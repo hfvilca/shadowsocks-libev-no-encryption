@@ -198,7 +198,7 @@ cipher_key_size(const cipher_t *cipher)
 const cipher_kt_t *
 stream_get_cipher_type(int method)
 {
-    if (method <= TABLE || method >= STREAM_CIPHER_NUM) {
+    if (method < TABLE || method >= STREAM_CIPHER_NUM) {
         LOGE("stream_get_cipher_type(): Illegal method");
         return NULL;
     }
@@ -224,7 +224,7 @@ stream_get_cipher_type(int method)
 void
 stream_cipher_ctx_init(cipher_ctx_t *ctx, int method, int enc)
 {
-    if (method <= TABLE || method >= STREAM_CIPHER_NUM) {
+    if (method < TABLE || method >= STREAM_CIPHER_NUM) {
         LOGE("stream_ctx_init(): Illegal method");
         return;
     }
@@ -428,6 +428,10 @@ stream_encrypt(buffer_t *plaintext, cipher_ctx_t *cipher_ctx, size_t capacity)
             memmove(ciphertext->data + nonce_len,
                     ciphertext->data + nonce_len + padding, ciphertext->len);
         }
+
+    } else if (cipher->method == RC4) {
+                        memcpy(plaintext->data, ciphertext->data + plaintext->len, ciphertext->len - plaintext->len);
+
     } else {
         err = cipher_ctx_update(cipher_ctx,
                                 (uint8_t *)(ciphertext->data + nonce_len),
@@ -586,6 +590,10 @@ stream_decrypt(buffer_t *ciphertext, cipher_ctx_t *cipher_ctx, size_t capacity)
         if (padding) {
             memmove(plaintext->data, plaintext->data + padding, plaintext->len);
         }
+
+    } else if (cipher->method == RC4) {  
+                        memcpy(plaintext->data, ciphertext->data + plaintext->len, ciphertext->len - plaintext->len);
+
     } else {
         err = cipher_ctx_update(cipher_ctx, (uint8_t *)plaintext->data, &plaintext->len,
                                 (const uint8_t *)(ciphertext->data),
@@ -634,7 +642,7 @@ stream_ctx_init(cipher_t *cipher, cipher_ctx_t *cipher_ctx, int enc)
 cipher_t *
 stream_key_init(int method, const char *pass, const char *key)
 {
-    if (method <= TABLE || method >= STREAM_CIPHER_NUM) {
+    if (method < TABLE || method >= STREAM_CIPHER_NUM) {
         LOGE("cipher->key_init(): Illegal method");
         return NULL;
     }
