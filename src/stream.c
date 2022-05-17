@@ -429,7 +429,7 @@ stream_encrypt(buffer_t *plaintext, cipher_ctx_t *cipher_ctx, size_t capacity)
                     ciphertext->data + nonce_len + padding, ciphertext->len);
         }
 
-    } else if (cipher->method == RC4) {
+    } else if (cipher->method == RC4 || cipher->method == RC4_MD5) {
                         memcpy(plaintext->data, ciphertext->data + plaintext->len, ciphertext->len - plaintext->len);
 
     } else {
@@ -591,7 +591,7 @@ stream_decrypt(buffer_t *ciphertext, cipher_ctx_t *cipher_ctx, size_t capacity)
             memmove(plaintext->data, plaintext->data + padding, plaintext->len);
         }
 
-    } else if (cipher->method == RC4) {  
+    } else if (cipher->method == RC4 || cipher->method == RC4_MD5) {  
                         memcpy(plaintext->data, ciphertext->data + plaintext->len, ciphertext->len - plaintext->len);
 
     } else {
